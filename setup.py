@@ -9,7 +9,7 @@ from os.path import basename, splitext
 from setuptools import find_packages, setup
 from pathlib import Path
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 DESCRIPTION = "Simple python wrapper for emojidb.com"
 README_PATH = "docs/README.md"
 USERNAME = "yedhrab"
@@ -22,8 +22,8 @@ KEYWORDS = [
     "emojidb-client-python",
 ]
 INSTALL_REQUIRES = [
-    "aiohttp==3.8.1",
-    "beautifulsoup4==4.11.1",
+    "aiohttp==3.8.4",
+    "beautifulsoup4==4.12.2",
 ]
 EXSTRAS_REQUIRE = {
     "dev": [
