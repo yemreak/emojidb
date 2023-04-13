@@ -13,7 +13,7 @@ VERSION = "1.0.0"
 DESCRIPTION = "Simple python wrapper for emojidb.com"
 README_PATH = "docs/README.md"
 USERNAME = "yedhrab"
-REPOSITORY = "emojidb"
+REPOSITORY = "emojidb-python"
 KEYWORDS = [
     "emoji",
     "emojidb",

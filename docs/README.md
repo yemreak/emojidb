@@ -5,7 +5,7 @@
 ## ⭐️ Usage
 
 ```bash
-pip install emojidb
+pip install emojidb-python
 ```
 
 ```python
