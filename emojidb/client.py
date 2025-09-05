@@ -48,9 +48,6 @@ class EmojiDBClient:
         assert self.async_client is not None, "EmojiDBClient.__aexit__ has to be called from a context manager"
         await self.async_client.close()
 
-    
-
-
 class AsyncEmojiDBClient(EmojiDBClient):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
