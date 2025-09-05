@@ -188,3 +188,16 @@ class EmojiCacheSqlite(EmojiCache):
         except sqlite3.Error as e:
             print(f"Error clearing cache: {e}")
         
+
+class DisableEmojiCache(EmojiCache):
+    def __init__(self) -> None:
+        pass
+
+    def has_cache(self, query: str) -> bool:
+        return False
+    
+    def get_cache(self, query: str) -> List[str]:
+        return []
+
+    def write_cache(self, query: str, emojis: List[str]):
+        pass
