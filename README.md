@@ -12,14 +12,10 @@ pip install emojidb-python
 from asyncio import run
 from emojidb import EmojiDBClient
 
-from urllib.parse import quote
-
 
 async def _main_async():
-    query = "love"
-
     async with EmojiDBClient() as client:
-        emojis = await client.search(query)
+        emojis = await client.search("love")
         print(*emojis, sep=", ")
 
         client.like(emojis[0], query)
@@ -31,16 +27,63 @@ def main_async():
 def main():
     query = "love"
 
-    with EmojiDBClient() as client:
-        emojis = client.search(query)
-        print(*emojis, sep=", ")
+    client = EmojiDBClient()
+    emojis = client.search("love")
+    print(*emojis, sep=", ")
 
-        client.like(emojis[0], query)
+    client.like(emojis[0], query)
 
 
 if __name__ == "__main__":
     main()
     main_async()
+```
+
+If you want to change the caching behavior you can easily do so by just passing a custom cache class in the client.
+
+```python
+from emojidb import EmojiDBClient, EmojiCache, DisableEmojiCache, EmojiCacheSqlite
+
+# use sqlite as cache (DEFAULT with expires in 30 days)
+client = EmojiDBClient(EmojiCacheSqlite(expire_after_days=1))
+
+# disable the cache
+client = EmojiDBClient(DisableEmojiCache())
+
+# custom cache
+class MemoryCache(EmojiCache):
+    """
+    This cache only caches everything in memory.
+    When initializing a new client the cache wouldn't persist
+    """
+    def __init__(self):
+        self.data = {}
+
+    def has_cache(self, query: str) -> bool:
+        return query in self.data
+    
+    def get_cache(self, query: str) -> List[str]:
+        return self.data.get(query, [])
+    
+    def write_cache(self, query: str, emojis: List[str]):
+        return self.data[query] = emojis
+    
+    def clear_cache(self):
+        self.data = {}
+
+client = EmojiDBClient(MemoryCache())
+```
+
+The functions `EmojiCache.clean_cache()` and `EmojiCache.clear_cache()` are never called by the client, but it is recommended to still implement them.
+
+Programms that use this library can use these functions by doing this:
+
+```python
+from emojidb import EmojiDBClient
+
+client = EmojiDBClient(DisableEmojiCache())
+client.cache.clean_cache()
+client.cache.clear_cache()
 ```
 
 ## Features
