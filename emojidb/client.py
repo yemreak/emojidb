@@ -5,6 +5,7 @@ from typing import Any
 
 from platformdirs import user_cache_dir
 from aiohttp import ClientSession
+import requests
 from bs4 import BeautifulSoup
 
 
@@ -29,15 +30,35 @@ class EmojiDBClient:
 
     # the kwargs have to be there for backwards compatibility
     def __init__(self, **kwargs) -> None:
-        pass
+        self.async_client = None
+
+    def __enter__(self):
+        print("enter syncronously")
+        self.session = requests.Session()
+        return self
+    
+    def __exit__(self, *args):
+        print("exiting hehe")
 
     async def __aenter__(self):
-        self.session = ClientSession()
-        return self
+        self.async_client = AsyncEmojiDBClient()
+        return self.async_client
 
     async def __aexit__(self, *args: Any):
-        await self.session.close()
+        assert self.async_client is not None, "EmojiDBClient.__aexit__ has to be called from a context manager"
+        await self.async_client.close()
 
+    
+
+
+class AsyncEmojiDBClient(EmojiDBClient):
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.session = ClientSession()
+
+    async def close(self):
+        await self.session.close()
+    
     async def search_for_emojis(self, query: str) -> list[tuple[str, str]]:
         """Search emojis for query"""
         query = query.replace(" ", "-")
