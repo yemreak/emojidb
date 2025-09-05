@@ -2,7 +2,8 @@ import unicodedata
 from json import dump, load
 from pathlib import Path
 from typing import Any, List, Dict, Optional
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
+import time
 
 from aiohttp import ClientSession
 from easy_requests import Connection
@@ -54,7 +55,6 @@ class EmojiDBClient:
         self.cache.write_cache(query=query, emojis=results)
         return results
 
-
     def search(self, query: str) -> List[str]:
         query = escape_query(query)
 
@@ -62,6 +62,30 @@ class EmojiDBClient:
             return self.cache.get_cache(query)
         
         return self._search_no_cache(query=query)
+    
+
+    def _get_send_copy_url(self, emoji: str, query: str, is_negative: bool) -> str:
+        base = "https://emojidb.org/api/copyEmoji?"
+
+        query_params = {
+            "emoji": emoji,
+            "query": query,
+            "time": int(time.time() * 1000),
+            "key": "",
+            "anti": is_negative,
+        }
+
+        encoded_params = urlencode(query_params)
+        return base + encoded_params
+
+    def like(self, emoji: str, query: str):
+        url = self._get_send_copy_url(emoji=emoji, query=query, is_negative=False)
+        self.connection.get(url)
+
+
+    def dislike(self, emoji: str, query: str):
+        url = self._get_send_copy_url(emoji=emoji, query=query, is_negative=True)
+        self.connection.get(url)
 
 
 class AsyncEmojiDBClient(EmojiDBClient):
@@ -97,3 +121,14 @@ class AsyncEmojiDBClient(EmojiDBClient):
         Use search instead
         """
         return [(e, unicodedata.name(e, "") if len(e) == 1 else "") for e in await self.search(query=query)]
+    
+    async def like(self, emoji: str, query: str):
+        url = self._get_send_copy_url(emoji=emoji, query=query, is_negative=False)
+        async with self.session.get(url) as response:
+            pass
+
+    async def dislike(self, emoji: str, query: str):
+        url = self._get_send_copy_url(emoji=emoji, query=query, is_negative=True)
+        self.connection.get(url)
+        async with self.session.get(url) as response:
+            pass

@@ -26,9 +26,10 @@ if __name__ == "__main__":
 
 ## ToDo
 
-- [ ] cache with actual sqlite database
+- [x] cache with actual sqlite database
 - [x] implement synchronous option
 - [x] built query properly
+- [x] liking and disliking emojis
 
 ## 🪪 License
 
