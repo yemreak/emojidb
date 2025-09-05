@@ -3,26 +3,21 @@ from json import dump, load
 from pathlib import Path
 from typing import Any
 
+from platformdirs import user_cache_dir
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
 
 class EmojiDBClient:
     """A client for the EmojiDB website."""
-
-    data_path: Path
-
-    jsondb_path: Path
-
     session: ClientSession
 
     def __init__(self, relative_path: str = "emojidb") -> None:
-        self.data_path = Path.home() / relative_path
-        self.data_path.mkdir(parents=True, exist_ok=True)
-
-        self.jsondb_path = self.data_path / "emojis.json"
-        if not self.jsondb_path.exists():
-            self.jsondb_path.write_text("{}")
+        cache_dir = Path(user_cache_dir("emojidb-python", "yemreak"))
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        self.cache_path = cache_dir / "emojis.json"
+        if not self.cache_path.exists():
+            self.cache_path.write_text("{}")
 
     async def __aenter__(self):
         self.session = ClientSession()
@@ -34,7 +29,7 @@ class EmojiDBClient:
     async def search_for_emojis(self, query: str) -> list[tuple[str, str]]:
         """Search emojis for query"""
         query = query.replace(" ", "-")
-        with self.jsondb_path.open("r") as f:
+        with self.cache_path.open("r") as f:
             jsondb = load(f)
         if query not in jsondb:
             async with self.session.get(
@@ -44,13 +39,17 @@ class EmojiDBClient:
                 results = soup.find_all("div", class_="emoji")
                 emojis = [result.text for result in results]
             jsondb[query] = emojis
-            with self.jsondb_path.open("w") as f:
+
+            with self.cache_path.open("w") as f:
                 dump(jsondb, f, ensure_ascii=False)
+        
         emojis_info = []
+        
         for emoji in jsondb[query]:
             try:
                 info = unicodedata.name(emoji).capitalize()
             except:
                 info = ""
             emojis_info.append((emoji, info))
+        
         return emojis_info

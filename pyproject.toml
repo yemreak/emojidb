@@ -29,6 +29,7 @@ keywords = [
 dependencies = [
     "aiohttp==3.8.4",
     "beautifulsoup4==4.12.2",
+    "platformdirs~=4.4.0",
 ]
 
 [project.optional-dependencies]

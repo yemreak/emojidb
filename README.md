@@ -24,6 +24,11 @@ if __name__ == "__main__":
     run(main)
 ```
 
+## ToDo
+
+- [ ] cache with actual sqlite database
+- [ ] implement synchronous option
+
 ## 🪪 License
 
 ```
