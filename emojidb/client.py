@@ -1,7 +1,7 @@
 import unicodedata
 from json import dump, load
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Dict
 from urllib.parse import quote
 
 from platformdirs import user_cache_dir
@@ -57,40 +57,26 @@ class EmojiDBClient:
         assert self.async_client is not None, "EmojiDBClient.__aexit__ has to be called from a context manager"
         await self.async_client.close()
 
-    def search_for_emojis(self, query: str) -> list[tuple[str, str]]:
-        """
-        Only exists for backwards compatibility.
-        Use search instead
-        """
-        return self.search(query=query)
-
-    def search(self, query: str) -> list[tuple[str, str]]:
+    def search(self, query: str) -> List[str]:
         query = escape_query(query)
 
+        json_db: Dict[str, List[str]]
         with CACHE_PATH.open("r") as f:
             json_db = load(f)
 
-        if query not in json_db:
-            response = self.connection.get(f"https://emojidb.org/{query}-emojis")
-            soup = BeautifulSoup(response.text, "html.parser")
-            results = soup.find_all("div", class_="emoji")
-            
-            json_db[query] = [result.text for result in results]
+        if query in json_db:
+            return json_db[query]
+        
+        response = self.connection.get(f"https://emojidb.org/{query}-emojis")
+        soup = BeautifulSoup(response.text, "html.parser")
+        results = soup.find_all("div", class_="emoji")
+        
+        json_db[query] = [result.text for result in results]
 
-            with CACHE_PATH.open("w") as f:
-                dump(json_db, f, ensure_ascii=False)
-        
-        emojis_info = []
-        
-        for emoji in json_db[query]:
-            try:
-                info = unicodedata.name(emoji).capitalize()
-            except:
-                info = ""
-            emojis_info.append((emoji, info))
-        
-        return emojis_info
-    
+        with CACHE_PATH.open("w") as f:
+            dump(json_db, f, ensure_ascii=False)
+
+        return json_db[query]
 
 
 class AsyncEmojiDBClient(EmojiDBClient):
@@ -101,31 +87,31 @@ class AsyncEmojiDBClient(EmojiDBClient):
     async def close(self):
         await self.session.close()
     
-    async def search(self, query: str) -> list[tuple[str, str]]:
-        """Search emojis for query"""
+    async def search(self, query: str) -> List[str]:
         query = escape_query(query)
 
+        json_db: Dict[str, List[str]]
         with CACHE_PATH.open("r") as f:
             json_db = load(f)
 
-        if query not in json_db:
-            async with self.session.get(
-                f"https://emojidb.org/{query}-emojis"
-            ) as response:
-                soup = BeautifulSoup(await response.content.read(), "html.parser")
-                results = soup.find_all("div", class_="emoji")
-                json_db[query] = [result.text for result in results]
+        if query in json_db:
+            return json_db[query]
+
+        async with self.session.get(
+            f"https://emojidb.org/{query}-emojis"
+        ) as response:
+            soup = BeautifulSoup(await response.content.read(), "html.parser")
+            results = soup.find_all("div", class_="emoji")
+            json_db[query] = [result.text for result in results]
 
             with CACHE_PATH.open("w") as f:
                 dump(json_db, f, ensure_ascii=False)
-        
-        emojis_info = []
-        
-        for emoji in json_db[query]:
-            try:
-                info = unicodedata.name(emoji).capitalize()
-            except:
-                info = ""
-            emojis_info.append((emoji, info))
-        
-        return emojis_info
+
+            return json_db[query]
+    
+    async def search_for_emojis(self, query: str) -> list[tuple[str, str]]:
+        """
+        Only exists for backwards compatibility.
+        Use search instead
+        """
+        return [(e, unicodedata.name(e, "")) for e in await self.search(query=query)]
