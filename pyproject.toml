@@ -1,6 +1,6 @@
 [project]
 name = "emojidb-python"
-version = "1.0.1"
+version = "1.1.0"
 license-files = ["LICENSE"]
 description = "Simple python wrapper for emojidb.com"
 
