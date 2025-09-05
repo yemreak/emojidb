@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
 - [ ] cache with actual sqlite database
 - [x] implement synchronous option
-- [ ] built query properly
+- [x] built query properly
 
 ## 🪪 License
 
