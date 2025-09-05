@@ -2,6 +2,7 @@ import unicodedata
 from json import dump, load
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from platformdirs import user_cache_dir
 from aiohttp import ClientSession
@@ -22,6 +23,12 @@ def init_cache() -> Path:
 
 
 CACHE_PATH = init_cache()
+
+
+def escape_query(query: str) -> str:
+    query = query.replace("-", "--")
+    query = query.replace(" ", "-")
+    return quote(query, safe="")
 
 
 class EmojiDBClient:
@@ -58,7 +65,7 @@ class EmojiDBClient:
         return self.search(query=query)
 
     def search(self, query: str) -> list[tuple[str, str]]:
-        query = query.replace(" ", "-")
+        query = escape_query(query)
 
         with CACHE_PATH.open("r") as f:
             json_db = load(f)
@@ -96,7 +103,7 @@ class AsyncEmojiDBClient(EmojiDBClient):
     
     async def search(self, query: str) -> list[tuple[str, str]]:
         """Search emojis for query"""
-        query = query.replace(" ", "-")
+        query = escape_query(query)
 
         with CACHE_PATH.open("r") as f:
             json_db = load(f)
