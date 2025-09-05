@@ -5,7 +5,7 @@ from typing import Any
 
 from platformdirs import user_cache_dir
 from aiohttp import ClientSession
-import requests
+from easy_requests import Connection
 from bs4 import BeautifulSoup
 
 
@@ -26,19 +26,21 @@ CACHE_PATH = init_cache()
 
 class EmojiDBClient:
     """A client for the EmojiDB website."""
-    session: ClientSession
 
     # the kwargs have to be there for backwards compatibility
     def __init__(self, **kwargs) -> None:
         self.async_client = None
 
+        self.connection = Connection()
+        self.connection.generate_headers()
+
+    # the synchronous context manager doesn't do anything, 
+    # however it exists so that you can use this synchronous similar to how you'd use async 
     def __enter__(self):
-        print("enter syncronously")
-        self.session = requests.Session()
         return self
     
     def __exit__(self, *args):
-        print("exiting hehe")
+        pass
 
     async def __aenter__(self):
         self.async_client = AsyncEmojiDBClient()
@@ -56,7 +58,31 @@ class EmojiDBClient:
         return self.search(query=query)
 
     def search(self, query: str) -> list[tuple[str, str]]:
-        return []
+        query = query.replace(" ", "-")
+
+        with CACHE_PATH.open("r") as f:
+            json_db = load(f)
+
+        if query not in json_db:
+            response = self.connection.get(f"https://emojidb.org/{query}-emojis")
+            soup = BeautifulSoup(response.text, "html.parser")
+            results = soup.find_all("div", class_="emoji")
+            
+            json_db[query] = [result.text for result in results]
+
+            with CACHE_PATH.open("w") as f:
+                dump(json_db, f, ensure_ascii=False)
+        
+        emojis_info = []
+        
+        for emoji in json_db[query]:
+            try:
+                info = unicodedata.name(emoji).capitalize()
+            except:
+                info = ""
+            emojis_info.append((emoji, info))
+        
+        return emojis_info
     
 
 
@@ -81,8 +107,7 @@ class AsyncEmojiDBClient(EmojiDBClient):
             ) as response:
                 soup = BeautifulSoup(await response.content.read(), "html.parser")
                 results = soup.find_all("div", class_="emoji")
-                emojis = [result.text for result in results]
-            json_db[query] = emojis
+                json_db[query] = [result.text for result in results]
 
             with CACHE_PATH.open("w") as f:
                 dump(json_db, f, ensure_ascii=False)

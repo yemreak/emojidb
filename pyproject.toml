@@ -30,6 +30,7 @@ dependencies = [
     "aiohttp==3.8.4",
     "beautifulsoup4==4.12.2",
     "platformdirs~=4.4.0",
+    "easy-requests~=1.1.2",
 ]
 
 [project.optional-dependencies]
