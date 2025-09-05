@@ -1,8 +1,7 @@
 import sqlite3
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 from platformdirs import user_cache_dir
-from datetime import datetime, timedelta
 
 
 class EmojiCache:

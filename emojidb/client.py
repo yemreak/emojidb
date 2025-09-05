@@ -1,7 +1,5 @@
 import unicodedata
-from json import dump, load
-from pathlib import Path
-from typing import Any, List, Dict, Optional
+from typing import Any, List, Optional
 from urllib.parse import quote, urlencode
 import time
 
