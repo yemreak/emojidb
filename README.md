@@ -1,6 +1,6 @@
 # 📦 EmojiDB
 
-- Simple python wrapper for emojidb.com
+Simple python wrapper for [emojidb.com](https://emojidb.org/).
 
 ## ⭐️ Usage
 
@@ -17,7 +17,7 @@ from urllib.parse import quote
 
 async def _main_async():
     query = "love"
-    
+
     async with EmojiDBClient() as client:
         emojis = await client.search(query)
         print(*emojis, sep=", ")
@@ -43,12 +43,12 @@ if __name__ == "__main__":
     main_async()
 ```
 
-## ToDo
+## Features
 
-- [x] cache with actual sqlite database
-- [x] implement synchronous option
-- [x] built query properly
-- [x] liking and disliking emojis
+- use an asynchronous client or a synchronous one
+- cache the results using sqlite
+- search for emojis
+- like and dislike emojis (please do not abuse that)
 
 ## 🪪 License
 
