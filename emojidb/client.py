@@ -48,6 +48,18 @@ class EmojiDBClient:
         assert self.async_client is not None, "EmojiDBClient.__aexit__ has to be called from a context manager"
         await self.async_client.close()
 
+    def search_for_emojis(self, query: str) -> list[tuple[str, str]]:
+        """
+        Only exists for backwards compatibility.
+        Use search instead
+        """
+        return self.search(query=query)
+
+    def search(self, query: str) -> list[tuple[str, str]]:
+        return []
+    
+
+
 class AsyncEmojiDBClient(EmojiDBClient):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -56,7 +68,7 @@ class AsyncEmojiDBClient(EmojiDBClient):
     async def close(self):
         await self.session.close()
     
-    async def search_for_emojis(self, query: str) -> list[tuple[str, str]]:
+    async def search(self, query: str) -> list[tuple[str, str]]:
         """Search emojis for query"""
         query = query.replace(" ", "-")
 
