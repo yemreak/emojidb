@@ -2,6 +2,7 @@ import sqlite3
 from pathlib import Path
 from typing import List
 from platformdirs import user_cache_dir
+import json
 
 
 class EmojiCache:
@@ -201,3 +202,27 @@ class DisableEmojiCache(EmojiCache):
 
     def write_cache(self, query: str, emojis: List[str]):
         pass
+
+
+class LegacyJsonCache(EmojiCache):
+    def __init__(self) -> None:
+        cache_dir = Path(user_cache_dir("emojidb-python", "yemreak"))
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        self.cache_file = cache_dir / "emojis.json"
+        
+        if not self.cache_file.exists():
+            self.cache_file.write_text("{}")
+
+        with self.cache_file.open("r") as f:
+            self.data = json.load(f)
+
+    def has_cache(self, query: str) -> bool:
+        return query in self.data
+    
+    def get_cache(self, query: str) -> List[str]:
+        return self.data.get("query", [])
+
+    def write_cache(self, query: str, emojis: List[str]):
+        self.data[query] = emojis
+        with self.cache_file.open("w") as f:
+            json.dump(f, self.data)
