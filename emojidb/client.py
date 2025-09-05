@@ -93,6 +93,7 @@ class EmojiDBClient:
             "time": int(time.time() * 1000),
             "manuallySubmitted": 1,
             "referrer": "",
+            "embedMode": "no",
             "key": "",
         }
 
