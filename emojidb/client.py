@@ -60,7 +60,6 @@ class EmojiDBClient:
             return self.cache.get_cache(query)
         
         return self._search_no_cache(query=query)
-    
 
     def _get_send_copy_url(self, emoji: str, query: str, is_negative: bool) -> str:
         base = "https://emojidb.org/api/copyEmoji?"
@@ -113,8 +112,6 @@ class AsyncEmojiDBClient(EmojiDBClient):
         await self.session.close()
     
     async def _search_no_cache(self, query: str) -> List[str]:
-        print("actually downloading async")
-
         async with self.session.get(
             f"https://emojidb.org/{query}-emojis"
         ) as response:

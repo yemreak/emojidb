@@ -43,6 +43,10 @@ client = EmojiDBClient()
 # fetch emojis
 emojis = client.search("love")
 print(*emojis, sep=", ")
+# if you want to fetch similar emojis,
+# you can just use the search function an pass in the emoji
+emojis = client.search("🥺")
+print(*emojis, sep=", ")
 
 # like an emoji
 client.like("🥺", "pleading face")
