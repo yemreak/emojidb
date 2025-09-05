@@ -8,35 +8,50 @@ Simple python wrapper for [emojidb.com](https://emojidb.org/).
 pip install emojidb-python
 ```
 
+The library can be asynchronously and synchronously.
+
 ```python
 from asyncio import run
 from emojidb import EmojiDBClient
 
 
-async def _main_async():
+async def main():
     async with EmojiDBClient() as client:
         emojis = await client.search("love")
         print(*emojis, sep=", ")
 
         client.like(emojis[0], query)
 
-def main_async():
-    run(_main_async())
+run(main())
+```
 
+```python
+from emojidb import EmojiDBClient
 
-def main():
-    query = "love"
+client = EmojiDBClient()
+emojis = client.search("love")
+print(*emojis, sep=", ")
+```
 
-    client = EmojiDBClient()
-    emojis = client.search("love")
-    print(*emojis, sep=", ")
+You can also do more than just fetch emojis. All of those functions work both async and synchronously. Here are all functionalities.
 
-    client.like(emojis[0], query)
+```python
+from emojidb import EmojiDBClient
 
+client = EmojiDBClient()
 
-if __name__ == "__main__":
-    main()
-    main_async()
+# fetch emojis
+emojis = client.search("love")
+print(*emojis, sep=", ")
+
+# like an emoji
+client.like("🥺", "pleading face")
+
+# dislike an emoji
+client.dislike("🥺", "pleading face")
+
+# suggest a new emoji
+client.add_emoji("🥺", "pleading face")
 ```
 
 If you want to change the caching behavior you can easily do so by just passing a custom cache class in the client.
