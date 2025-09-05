@@ -120,7 +120,7 @@ class AsyncEmojiDBClient(EmojiDBClient):
         Only exists for backwards compatibility.
         Use search instead
         """
-        return [(e, unicodedata.name(e, "") if len(e) == 1 else "") for e in await self.search(query=query)]
+        return [(e, unicodedata.name(e, "").capitalize() if len(e) == 1 else "") for e in await self.search(query=query)]
     
     async def like(self, emoji: str, query: str):
         url = self._get_send_copy_url(emoji=emoji, query=query, is_negative=False)
