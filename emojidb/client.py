@@ -80,11 +80,28 @@ class EmojiDBClient:
         url = self._get_send_copy_url(emoji=emoji, query=query, is_negative=False)
         self.connection.get(url)
 
-
     def dislike(self, emoji: str, query: str):
         url = self._get_send_copy_url(emoji=emoji, query=query, is_negative=True)
         self.connection.get(url)
 
+    def _get_add_emoji_url(self, emoji: str, query: str) -> str:
+        base = "https://emojidb.org/api/copyEmoji?"
+
+        query_params = {
+            "emoji": emoji,
+            "query": query,
+            "time": int(time.time() * 1000),
+            "manuallySubmitted": 1,
+            "referrer": "",
+            "key": "",
+        }
+
+        encoded_params = urlencode(query_params)
+        return base + encoded_params
+    
+    def add_emoji(self, emoji: str, query: str):
+        url = self._get_add_emoji_url(emoji=emoji, query=query)
+        self.connection.get(url)
 
 class AsyncEmojiDBClient(EmojiDBClient):
     def __init__(self, **kwargs) -> None:
@@ -127,6 +144,10 @@ class AsyncEmojiDBClient(EmojiDBClient):
 
     async def dislike(self, emoji: str, query: str):
         url = self._get_send_copy_url(emoji=emoji, query=query, is_negative=True)
-        self.connection.get(url)
+        async with self.session.get(url) as response:
+            pass
+    
+    async def add_emoji(self, emoji: str, query: str):
+        url = self._get_add_emoji_url(emoji=emoji, query=query)
         async with self.session.get(url) as response:
             pass
