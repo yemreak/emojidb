@@ -12,16 +12,35 @@ pip install emojidb-python
 from asyncio import run
 from emojidb import EmojiDBClient
 
+from urllib.parse import quote
 
-async def main():
+
+async def _main_async():
     query = "love"
+    
     async with EmojiDBClient() as client:
-        for emoji, info in await client.search_for_emojis(query):
-            print(emoji, info)
+        emojis = await client.search(query)
+        print(*emojis, sep=", ")
+
+        client.like(emojis[0], query)
+
+def main_async():
+    run(_main_async())
+
+
+def main():
+    query = "love"
+
+    with EmojiDBClient() as client:
+        emojis = client.search(query)
+        print(*emojis, sep=", ")
+
+        client.like(emojis[0], query)
 
 
 if __name__ == "__main__":
-    run(main())
+    main()
+    main_async()
 ```
 
 ## ToDo
